@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Download E-Ticket Undangan</title>
-  <!-- Menggunakan Tailwind CSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -40,7 +39,6 @@
     }
     .ticket-card::before { left: -14px; }
     .ticket-card::after { right: -14px; }
-    
     .btn-gold {
       background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
       color: white;
@@ -50,10 +48,6 @@
       background: linear-gradient(135deg, #aa8c2c 0%, #8c7322 100%);
       transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.3);
-    }
-    .btn-gold:disabled {
-      background: #cccccc;
-      cursor: not-allowed;
     }
     .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes fadeIn {
@@ -68,26 +62,21 @@
     <!-- Card Utama -->
     <div class="glass-card rounded-3xl p-8 relative overflow-hidden mt-4 mb-4">
       
-      <!-- Hiasan Sudut -->
       <div class="absolute -top-16 -right-16 w-48 h-48 bg-yellow-200 rounded-full opacity-30 blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-blue-200 rounded-full opacity-30 blur-3xl pointer-events-none"></div>
 
       <!-- Header -->
       <div class="text-center mb-8 relative z-10">
-        <? if (typeof logoUrl !== 'undefined' && logoUrl) { ?>
-          <img src="<?= logoUrl ?>" alt="Logo Acara" class="mx-auto max-h-24 mb-4 object-contain drop-shadow-sm">
-        <? } else { ?>
-          <div class="w-16 h-16 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl mx-auto flex items-center justify-center mb-4 text-3xl border border-yellow-200 shadow-sm">
-            🎟️
-          </div>
-        <? } ?>
+        <img id="logoDisplay" src="" alt="Logo Acara" class="mx-auto max-h-24 mb-4 object-contain drop-shadow-sm hidden">
+        <div id="defaultIcon" class="w-16 h-16 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl mx-auto flex items-center justify-center mb-4 text-3xl border border-yellow-200 shadow-sm">
+          🎟️
+        </div>
         <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">Portal Undangan</h1>
-        <p class="text-sm text-gray-500 mt-1 font-medium"><?= typeof agendaName !== 'undefined' ? agendaName : 'Sistem Registrasi Acara' ?></p>
+        <p id="agendaNameDisplay" class="text-sm text-gray-500 mt-1 font-medium animate-pulse">Memuat data server...</p>
       </div>
 
-      <!-- COUNTDOWN TIMER (FITUR BARU) -->
-      <? if (typeof eventDateTime !== 'undefined' && eventDateTime) { ?>
-      <div class="mb-7 relative z-10">
+      <!-- COUNTDOWN TIMER -->
+      <div id="countdownArea" class="mb-7 relative z-10 hidden">
         <div class="flex justify-center gap-3 text-center">
           <div class="bg-white/80 backdrop-blur-md border border-gray-100 shadow-sm rounded-xl p-2.5 w-[70px]">
             <div id="cd-days" class="text-2xl font-bold text-gray-800 tracking-tighter">00</div>
@@ -106,15 +95,12 @@
             <div class="text-[9px] font-bold text-yellow-500 uppercase tracking-wide mt-0.5">Detik</div>
           </div>
         </div>
-        <!-- Simpan data waktu dari backend ke frontend -->
-        <script>window.TARGET_DATE = "<?= eventDateTime ?>";</script>
       </div>
-      <? } ?>
 
       <!-- Form Pencarian -->
       <form id="searchFormArea" class="space-y-5 relative z-10">
         <div id="welcomeBackMessage" class="hidden text-center p-3 bg-blue-50 text-blue-700 rounded-xl text-xs font-semibold border border-blue-100 mb-4">
-          Mendeteksi riwayat pencarian Anda...
+          Mendeteksi riwayat undangan Anda...
         </div>
         <div>
           <label for="searchInput" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 ml-1">Identitas Undangan</label>
@@ -122,30 +108,26 @@
                  class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-100 outline-none transition-all text-sm bg-white/80 backdrop-blur-sm font-medium placeholder-gray-400 shadow-inner">
         </div>
         
-        <button type="submit" id="btnSearch" class="btn-gold w-full py-4 rounded-xl font-bold text-sm shadow-lg flex justify-center items-center gap-2">
-          <span id="btnSearchText">Temukan Undangan Saya</span>
-          <svg id="btnSearchIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <button type="submit" id="btnSearch" class="btn-gold w-full py-4 rounded-xl font-bold text-sm shadow-lg flex justify-center items-center gap-2" disabled>
+          <span id="btnSearchText">Menghubungkan API...</span>
         </button>
       </form>
 
       <!-- Area Loading -->
       <div id="loadingArea" class="hidden mt-6 text-center py-4">
         <div class="w-10 h-10 border-4 border-gray-100 border-t-yellow-500 rounded-full animate-spin mx-auto shadow-sm"></div>
-        <p class="text-xs font-semibold text-gray-500 mt-4 animate-pulse tracking-wide">Mencari data ke sistem...</p>
+        <p class="text-xs font-semibold text-gray-500 mt-4 animate-pulse tracking-wide">Sinkronisasi Server REST...</p>
       </div>
 
       <!-- Area Hasil -->
       <div id="resultArea" class="hidden mt-4 pt-4 border-t border-gray-100/50">
-        
         <!-- Template Sukses -->
         <div id="successResult" class="hidden text-center fade-in">
-          
           <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 border border-green-200">
             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
             Terverifikasi
           </div>
 
-          <!-- KARTU TIKET DIGITAL -->
           <div class="ticket-card rounded-2xl p-6 mb-6 shadow-sm relative overflow-hidden">
             <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">ID Undangan</p>
             <p id="guestIdDisplay" class="text-lg font-mono font-bold text-yellow-600 mb-4 bg-yellow-50 inline-block px-3 py-1 rounded-lg border border-yellow-100">-</p>
@@ -159,7 +141,6 @@
             <p class="text-[10px] text-gray-400 font-medium">Tunjukkan QR ini ke panitia di pintu masuk</p>
           </div>
 
-          <!-- AREA PREVIEW PDF -->
           <div class="w-full flex justify-between items-center mb-2 px-1">
             <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">File Undangan Asli</span>
             <button onclick="togglePreview()" id="btnTogglePreview" type="button" class="text-xs text-blue-600 hover:text-blue-800 font-semibold underline">Lihat Preview</button>
@@ -172,13 +153,11 @@
             <iframe id="pdfPreviewFrame" src="" class="relative z-10 w-full h-full border-0 bg-transparent" allow="autoplay" allowfullscreen></iframe>
           </div>
 
-          <!-- Tombol Download -->
           <a id="downloadLink" href="#" target="_top" rel="noopener noreferrer" class="flex justify-center items-center gap-2 w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold text-sm transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             Download E-Ticket (PDF)
           </a>
           
-          <!-- Tombol Clear Cache / Cari Lain -->
           <button type="button" onclick="clearCacheAndReset()" class="mt-5 text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center gap-1 mx-auto w-fit px-3 py-2 rounded-lg hover:bg-red-50">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
             Keluar / Cari Undangan Lain
@@ -198,53 +177,83 @@
           </button>
         </div>
       </div>
-
     </div>
-
-    <!-- Footer -->
-    <p class="text-center text-[11px] font-semibold tracking-wide text-gray-400 uppercase mt-6 mb-8">
-      Sistem Registrasi Pintar
-    </p>
+    <p class="text-center text-[11px] font-semibold tracking-wide text-gray-400 uppercase mt-6 mb-8">Sistem Registrasi Pintar</p>
   </div>
 
   <script>
+    // =========================================================
+    // KONFIGURASI API (WAJIB DIISI SEBELUM DEPLOY KE GITHUB)
+    // =========================================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbyRD2HhOpPye4yJa9DApsfbJQZZIHDfwjE3A-DOKNnrbFDaKXcK1QecBoB8qy_AIFZKfA/exec";
+    // Contoh: const API_URL = "https://script.google.com/macros/s/AKfyc.../exec";
+
     const CACHE_KEY = 'guest_ticket_id_cache';
+    const defaultBtnHtml = '<span>Temukan Undangan Saya</span><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>';
 
-    document.addEventListener("DOMContentLoaded", function() {
-      const searchForm = document.getElementById('searchFormArea');
-      if (searchForm) {
-        searchForm.addEventListener('submit', function(event) {
-          event.preventDefault();
-          performSearch(document.getElementById('searchInput').value);
-        });
-      }
+    document.addEventListener("DOMContentLoaded", async function() {
+      // Setup Form
+      document.getElementById('searchFormArea').addEventListener('submit', function(event) {
+        event.preventDefault();
+        performSearch(document.getElementById('searchInput').value);
+      });
 
-      const savedQuery = localStorage.getItem(CACHE_KEY);
-      if (savedQuery) {
-        document.getElementById('searchInput').value = savedQuery;
-        document.getElementById('welcomeBackMessage').classList.remove('hidden');
-        setTimeout(function() { performSearch(savedQuery, true); }, 800);
-      }
-      
-      // Inisialisasi Countdown Timer
-      if (typeof window.TARGET_DATE !== 'undefined' && window.TARGET_DATE) {
-        initCountdown(window.TARGET_DATE);
+      // 1. Fetch Data Konfigurasi Saat Halaman Dimuat
+      try {
+        let initData;
+        if(API_URL.includes("ISI_DENGAN_URL")) {
+          console.warn("Mode Simulasi Aktif: API URL belum diatur.");
+          initData = { success: true, agendaName: "Mode Simulasi (Demo)", eventDateTime: "2026-06-15 08:00" };
+        } else {
+          const response = await fetch(`${API_URL}?action=getInitData`);
+          initData = await response.json();
+        }
+
+        if (initData.success) {
+          document.getElementById('agendaNameDisplay').innerText = initData.agendaName || "Sistem Antrean";
+          document.getElementById('agendaNameDisplay').classList.remove('animate-pulse');
+          
+          if (initData.logoUrl) {
+            document.getElementById('logoDisplay').src = initData.logoUrl;
+            document.getElementById('logoDisplay').classList.remove('hidden');
+            document.getElementById('defaultIcon').classList.add('hidden');
+          }
+          
+          if (initData.eventDateTime) {
+            document.getElementById('countdownArea').classList.remove('hidden');
+            initCountdown(initData.eventDateTime);
+          }
+
+          // Aktifkan Tombol
+          const btn = document.getElementById('btnSearch');
+          btn.disabled = false;
+          btn.innerHTML = defaultBtnHtml;
+
+          // Cek Cache
+          const savedQuery = localStorage.getItem(CACHE_KEY);
+          if (savedQuery) {
+            document.getElementById('searchInput').value = savedQuery;
+            document.getElementById('welcomeBackMessage').classList.remove('hidden');
+            setTimeout(function() { performSearch(savedQuery, true); }, 800);
+          }
+        }
+      } catch (error) {
+        document.getElementById('agendaNameDisplay').innerText = "Gagal terhubung ke Database Google.";
+        document.getElementById('agendaNameDisplay').classList.replace('text-gray-500', 'text-red-500');
+        console.error("API Init Error:", error);
       }
     });
 
     // FUNGSI COUNTDOWN TIMER
     function initCountdown(targetDateStr) {
-      // Mengubah format "YYYY-MM-DD HH:MM" menjadi ramah ke semua Browser (Safari/Chrome)
       const safeDateStr = targetDateStr.replace(/-/g, '/');
       const targetDate = new Date(safeDateStr).getTime();
-      
-      if (isNaN(targetDate)) return; // Berhenti jika format di Sheet salah
+      if (isNaN(targetDate)) return; 
 
       const timerInterval = setInterval(function() {
         const now = new Date().getTime();
         const distance = targetDate - now;
 
-        // Jika waktu sudah lewat / hari H acara
         if (distance < 0) {
           clearInterval(timerInterval);
           document.getElementById("cd-days").innerText = "00";
@@ -257,13 +266,11 @@
           return;
         }
 
-        // Kalkulasi waktu
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        // Menampilkan hasilnya (dengan angka 0 di depan jika di bawah 10)
         document.getElementById("cd-days").innerText = days.toString().padStart(2, '0');
         document.getElementById("cd-hours").innerText = hours.toString().padStart(2, '0');
         document.getElementById("cd-minutes").innerText = minutes.toString().padStart(2, '0');
@@ -283,40 +290,33 @@
       }
     }
 
-    function performSearch(queryText, isAutoLoad = false) {
+    // FUNGSI PENCARIAN (MENGGUNAKAN FETCH API)
+    async function performSearch(queryText, isAutoLoad = false) {
+      const query = queryText ? queryText.trim() : "";
+      if (!query) return;
+
+      const btn = document.getElementById('btnSearch');
+      const loading = document.getElementById('loadingArea');
+      const resultArea = document.getElementById('resultArea');
+      const successBlock = document.getElementById('successResult');
+      const errorBlock = document.getElementById('errorResult');
+      const formArea = document.getElementById('searchFormArea');
+
+      btn.disabled = true;
+      btn.innerHTML = "Menghubungi Server...";
+      resultArea.classList.add('hidden');
+      successBlock.classList.add('hidden');
+      errorBlock.classList.add('hidden');
+      loading.classList.remove('hidden');
+
       try {
-        const query = queryText ? queryText.trim() : "";
-        if (!query) return;
-
-        const btn = document.getElementById('btnSearch');
-        const btnText = document.getElementById('btnSearchText');
-        const btnIcon = document.getElementById('btnSearchIcon');
-        
-        const loading = document.getElementById('loadingArea');
-        const resultArea = document.getElementById('resultArea');
-        const successBlock = document.getElementById('successResult');
-        const errorBlock = document.getElementById('errorResult');
-        const formArea = document.getElementById('searchFormArea');
-
-        // Reset state ke Loading
-        btn.disabled = true;
-        btnText.innerText = "Mencari...";
-        btnIcon.classList.add('hidden');
-        
-        resultArea.classList.add('hidden');
-        successBlock.classList.add('hidden');
-        errorBlock.classList.add('hidden');
-        loading.classList.remove('hidden');
-
-        // Mode Simulasi (Bypass jika dibuka di preview canvas lokal)
-        if (typeof google === 'undefined' || typeof google.script === 'undefined') {
+        // Mode Simulasi jika API_URL belum diisi
+        if (API_URL.includes("ISI_DENGAN_URL")) {
           setTimeout(function() {
             loading.classList.add('hidden');
             resultArea.classList.remove('hidden');
-            
             btn.disabled = false;
-            btnText.innerText = "Temukan Undangan Saya";
-            btnIcon.classList.remove('hidden');
+            btn.innerHTML = defaultBtnHtml;
             
             if (query.toLowerCase() === "demo" || query.toLowerCase() === "g-001") {
               document.getElementById('guestNameDisplay').innerText = "Tamu Demo";
@@ -324,95 +324,84 @@
               document.getElementById('downloadLink').href = "#";
               document.getElementById('pdfPreviewContainer').classList.add('hidden');
               document.getElementById('qrCodeContainer').classList.add('hidden'); 
-              formArea.classList.add('hidden'); 
+              document.getElementById('searchFormArea').classList.add('hidden'); 
               successBlock.classList.remove('hidden');
               localStorage.setItem(CACHE_KEY, "demo"); 
             } else {
-              document.getElementById('errorText').innerText = "Mode Pratinjau Lokal. Harap akses menggunakan Link URL Web App (Deploy) Google untuk terhubung ke database asli.";
+              document.getElementById('errorText').innerText = "Ini adalah Mode Pratinjau. Harap isi variabel API_URL di kode dengan URL Web App Anda untuk terhubung ke database.";
               errorBlock.classList.remove('hidden');
               if (isAutoLoad) localStorage.removeItem(CACHE_KEY); 
             }
           }, 1000);
-          return; 
+          return;
         }
 
-        // Panggil Server Asli (Google Apps Script)
-        google.script.run
-          .withSuccessHandler(function(response) {
-            loading.classList.add('hidden');
-            resultArea.classList.remove('hidden');
-            
-            btn.disabled = false;
-            btnText.innerText = "Temukan Undangan Saya";
-            btnIcon.classList.remove('hidden');
+        const response = await fetch(`${API_URL}?action=search&query=${encodeURIComponent(query)}`);
+        const result = await response.json();
 
-            if (response && response.success) {
-              localStorage.setItem(CACHE_KEY, query);
-              
-              document.getElementById('guestNameDisplay').innerText = response.name || "Tamu Terdaftar";
-              document.getElementById('guestIdDisplay').innerText = response.id || "ID";
-              document.getElementById('downloadLink').href = response.ticketUrl || "#";
-              
-              const qrImg = document.getElementById('qrImageDisplay');
-              const qrContainer = document.getElementById('qrCodeContainer');
-              
-              if (response.qrUrl && response.qrUrl.includes("http")) {
-                let qrIdMatch = response.qrUrl.match(/id=([-\w]+)/) || response.qrUrl.match(/d\/([-\w]+)/);
-                if (qrIdMatch && qrIdMatch[1]) {
-                  qrImg.src = "https://drive.google.com/thumbnail?id=" + qrIdMatch[1] + "&sz=w500";
-                } else {
-                  qrImg.src = response.qrUrl;
-                }
-                qrContainer.classList.remove('hidden');
-              } else {
-                qrContainer.classList.add('hidden');
-              }
+        loading.classList.add('hidden');
+        resultArea.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = defaultBtnHtml;
 
-              const ticketUrl = response.ticketUrl || "";
-              let fileId = null;
-              const matchId = ticketUrl.match(/id=([-\w]+)/);
-              const matchD = ticketUrl.match(/\/d\/([-\w]+)/);
-              
-              if (matchId) fileId = matchId[1];
-              else if (matchD) fileId = matchD[1];
-
-              const previewFrame = document.getElementById('pdfPreviewFrame');
-              const btnToggle = document.getElementById('btnTogglePreview');
-              
-              document.getElementById('pdfPreviewContainer').classList.add('hidden');
-              btnToggle.innerText = "Lihat Preview";
-
-              if (fileId) {
-                previewFrame.src = "https://drive.google.com/file/d/" + fileId + "/preview";
-                btnToggle.style.display = "inline-block";
-              } else {
-                btnToggle.style.display = "none";
-              }
-
-              formArea.classList.add('hidden'); 
-              successBlock.classList.remove('hidden');
-              document.getElementById('welcomeBackMessage').classList.add('hidden');
-            } else {
-              document.getElementById('errorText').innerText = (response && response.message) ? response.message : "Data undangan tidak ditemukan.";
-              errorBlock.classList.remove('hidden');
-              if (isAutoLoad) localStorage.removeItem(CACHE_KEY); 
-            }
-          })
-          .withFailureHandler(function(error) {
-            loading.classList.add('hidden');
-            resultArea.classList.remove('hidden');
-            
-            btn.disabled = false;
-            btnText.innerText = "Temukan Undangan Saya";
-            btnIcon.classList.remove('hidden');
-            
-            document.getElementById('errorText').innerText = "Koneksi ke sistem gagal. Pastikan internet Anda stabil.";
-            errorBlock.classList.remove('hidden');
-          })
-          .searchGuestTicket(query);
+        if (result.success) {
+          localStorage.setItem(CACHE_KEY, query);
           
-      } catch (e) {
-        alert("Sistem UI bermasalah: " + e.message);
+          document.getElementById('guestNameDisplay').innerText = result.name || "Tamu Terdaftar";
+          document.getElementById('guestIdDisplay').innerText = result.id || "ID";
+          document.getElementById('downloadLink').href = result.ticketUrl || "#";
+          
+          const qrImg = document.getElementById('qrImageDisplay');
+          const qrContainer = document.getElementById('qrCodeContainer');
+          
+          if (result.qrUrl && result.qrUrl.includes("http")) {
+            let qrIdMatch = result.qrUrl.match(/id=([-\w]+)/) || result.qrUrl.match(/d\/([-\w]+)/);
+            if (qrIdMatch && qrIdMatch[1]) {
+              qrImg.src = `https://drive.google.com/thumbnail?id=${qrIdMatch[1]}&sz=w500`;
+            } else {
+              qrImg.src = result.qrUrl;
+            }
+            qrContainer.classList.remove('hidden');
+          } else {
+            qrContainer.classList.add('hidden');
+          }
+
+          const ticketUrl = result.ticketUrl || "";
+          let fileId = null;
+          const matchId = ticketUrl.match(/id=([-\w]+)/);
+          const matchD = ticketUrl.match(/\/d\/([-\w]+)/);
+          if (matchId) fileId = matchId[1];
+          else if (matchD) fileId = matchD[1];
+
+          const previewFrame = document.getElementById('pdfPreviewFrame');
+          const btnToggle = document.getElementById('btnTogglePreview');
+          document.getElementById('pdfPreviewContainer').classList.add('hidden');
+          btnToggle.innerText = "Lihat Preview";
+
+          if (fileId) {
+            previewFrame.src = `https://drive.google.com/file/d/${fileId}/preview`;
+            btnToggle.style.display = "inline-block";
+          } else {
+            btnToggle.style.display = "none";
+          }
+
+          formArea.classList.add('hidden'); 
+          successBlock.classList.remove('hidden');
+          document.getElementById('welcomeBackMessage').classList.add('hidden');
+        } else {
+          document.getElementById('errorText').innerText = result.message || "Data tidak ditemukan.";
+          errorBlock.classList.remove('hidden');
+          if (isAutoLoad) localStorage.removeItem(CACHE_KEY); 
+        }
+      } catch (error) {
+        loading.classList.add('hidden');
+        resultArea.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerHTML = defaultBtnHtml;
+        
+        document.getElementById('errorText').innerText = "Gagal menghubungi API Server (CORS Error / Offline).";
+        errorBlock.classList.remove('hidden');
+        console.error("API Fetch Error:", error);
       }
     }
 
