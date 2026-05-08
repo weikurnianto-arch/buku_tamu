@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download E-Ticket Undangan</title>
+  <!-- Menggunakan Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 40px -10px rgba(31, 38, 135, 0.1);
+    }
+    .ticket-card {
+      background: linear-gradient(145deg, #ffffff, #f3f4f6);
+      border: 2px dashed #e5e7eb;
+      position: relative;
+    }
+    .ticket-card::before, .ticket-card::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+    .ticket-card::before { left: -14px; }
+    .ticket-card::after { right: -14px; }
+    
+    .btn-gold {
+      background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    .btn-gold:hover:not(:disabled) {
+      background: linear-gradient(135deg, #aa8c2c 0%, #8c7322 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(212, 175, 55, 0.3);
+    }
+    .btn-gold:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="items-center justify-center p-4">
+
+  <div class="w-full max-w-md mx-auto relative z-10 my-auto">
+    <!-- Card Utama -->
+    <div class="glass-card rounded-3xl p-8 relative overflow-hidden mt-4 mb-4">
+      
+      <!-- Hiasan Sudut -->
+      <div class="absolute -top-16 -right-16 w-48 h-48 bg-yellow-200 rounded-full opacity-30 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-blue-200 rounded-full opacity-30 blur-3xl pointer-events-none"></div>
+
+      <!-- Header -->
+      <div class="text-center mb-8 relative z-10">
+        <? if (typeof logoUrl !== 'undefined' && logoUrl) { ?>
+          <img src="<?= logoUrl ?>" alt="Logo Acara" class="mx-auto max-h-24 mb-4 object-contain drop-shadow-sm">
+        <? } else { ?>
+          <div class="w-16 h-16 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl mx-auto flex items-center justify-center mb-4 text-3xl border border-yellow-200 shadow-sm">
+            🎟️
+          </div>
+        <? } ?>
+        <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">Portal Undangan</h1>
+        <p class="text-sm text-gray-500 mt-1 font-medium"><?= typeof agendaName !== 'undefined' ? agendaName : 'Sistem Registrasi Acara' ?></p>
+      </div>
+
+      <!-- COUNTDOWN TIMER (FITUR BARU) -->
+      <? if (typeof eventDateTime !== 'undefined' && eventDateTime) { ?>
+      <div class="mb-7 relative z-10">
+        <div class="flex justify-center gap-3 text-center">
+          <div class="bg-white/80 backdrop-blur-md border border-gray-100 shadow-sm rounded-xl p-2.5 w-[70px]">
+            <div id="cd-days" class="text-2xl font-bold text-gray-800 tracking-tighter">00</div>
+            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Hari</div>
+          </div>
+          <div class="bg-white/80 backdrop-blur-md border border-gray-100 shadow-sm rounded-xl p-2.5 w-[70px]">
+            <div id="cd-hours" class="text-2xl font-bold text-gray-800 tracking-tighter">00</div>
+            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Jam</div>
+          </div>
+          <div class="bg-white/80 backdrop-blur-md border border-gray-100 shadow-sm rounded-xl p-2.5 w-[70px]">
+            <div id="cd-minutes" class="text-2xl font-bold text-gray-800 tracking-tighter">00</div>
+            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Menit</div>
+          </div>
+          <div class="bg-white/80 backdrop-blur-md border border-gray-100 shadow-sm rounded-xl p-2.5 w-[70px]">
+            <div id="cd-seconds" class="text-2xl font-bold text-yellow-600 tracking-tighter">00</div>
+            <div class="text-[9px] font-bold text-yellow-500 uppercase tracking-wide mt-0.5">Detik</div>
+          </div>
+        </div>
+        <!-- Simpan data waktu dari backend ke frontend -->
+        <script>window.TARGET_DATE = "<?= eventDateTime ?>";</script>
+      </div>
+      <? } ?>
+
+      <!-- Form Pencarian -->
+      <form id="searchFormArea" class="space-y-5 relative z-10">
+        <div id="welcomeBackMessage" class="hidden text-center p-3 bg-blue-50 text-blue-700 rounded-xl text-xs font-semibold border border-blue-100 mb-4">
+          Mendeteksi riwayat pencarian Anda...
+        </div>
+        <div>
+          <label for="searchInput" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 ml-1">Identitas Undangan</label>
+          <input type="text" id="searchInput" placeholder="Masukkan ID atau Nama Lengkap..." autocomplete="off" required
+                 class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-100 outline-none transition-all text-sm bg-white/80 backdrop-blur-sm font-medium placeholder-gray-400 shadow-inner">
+        </div>
+        
+        <button type="submit" id="btnSearch" class="btn-gold w-full py-4 rounded-xl font-bold text-sm shadow-lg flex justify-center items-center gap-2">
+          <span id="btnSearchText">Temukan Undangan Saya</span>
+          <svg id="btnSearchIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </button>
+      </form>
+
+      <!-- Area Loading -->
+      <div id="loadingArea" class="hidden mt-6 text-center py-4">
+        <div class="w-10 h-10 border-4 border-gray-100 border-t-yellow-500 rounded-full animate-spin mx-auto shadow-sm"></div>
+        <p class="text-xs font-semibold text-gray-500 mt-4 animate-pulse tracking-wide">Mencari data ke sistem...</p>
+      </div>
+
+      <!-- Area Hasil -->
+      <div id="resultArea" class="hidden mt-4 pt-4 border-t border-gray-100/50">
+        
+        <!-- Template Sukses -->
+        <div id="successResult" class="hidden text-center fade-in">
+          
+          <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 border border-green-200">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Terverifikasi
+          </div>
+
+          <!-- KARTU TIKET DIGITAL -->
+          <div class="ticket-card rounded-2xl p-6 mb-6 shadow-sm relative overflow-hidden">
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">ID Undangan</p>
+            <p id="guestIdDisplay" class="text-lg font-mono font-bold text-yellow-600 mb-4 bg-yellow-50 inline-block px-3 py-1 rounded-lg border border-yellow-100">-</p>
+            
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Nama Lengkap</p>
+            <h2 id="guestNameDisplay" class="text-xl font-extrabold text-gray-800 leading-tight mb-5">Nama Tamu</h2>
+
+            <div id="qrCodeContainer" class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 inline-block mb-2">
+              <img id="qrImageDisplay" src="" alt="QR Code" class="w-32 h-32 object-contain mx-auto">
+            </div>
+            <p class="text-[10px] text-gray-400 font-medium">Tunjukkan QR ini ke panitia di pintu masuk</p>
+          </div>
+
+          <!-- AREA PREVIEW PDF -->
+          <div class="w-full flex justify-between items-center mb-2 px-1">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">File Undangan Asli</span>
+            <button onclick="togglePreview()" id="btnTogglePreview" type="button" class="text-xs text-blue-600 hover:text-blue-800 font-semibold underline">Lihat Preview</button>
+          </div>
+          
+          <div id="pdfPreviewContainer" class="hidden w-full h-72 mb-5 rounded-xl overflow-hidden border-2 border-gray-100 shadow-inner bg-gray-50 relative transition-all">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <p class="text-xs font-semibold text-gray-400 animate-pulse">Memuat pratinjau PDF...</p>
+            </div>
+            <iframe id="pdfPreviewFrame" src="" class="relative z-10 w-full h-full border-0 bg-transparent" allow="autoplay" allowfullscreen></iframe>
+          </div>
+
+          <!-- Tombol Download -->
+          <a id="downloadLink" href="#" target="_top" rel="noopener noreferrer" class="flex justify-center items-center gap-2 w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold text-sm transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            Download E-Ticket (PDF)
+          </a>
+          
+          <!-- Tombol Clear Cache / Cari Lain -->
+          <button type="button" onclick="clearCacheAndReset()" class="mt-5 text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center gap-1 mx-auto w-fit px-3 py-2 rounded-lg hover:bg-red-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            Keluar / Cari Undangan Lain
+          </button>
+        </div>
+
+        <!-- Template Error -->
+        <div id="errorResult" class="hidden fade-in mt-4">
+          <div class="bg-red-50 text-red-600 p-5 rounded-2xl border border-red-100 text-center shadow-inner">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <p id="errorText" class="text-sm leading-relaxed font-semibold"></p>
+          </div>
+          <button type="button" onclick="resetSearch()" class="mt-5 w-full bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 py-3.5 rounded-xl font-bold text-sm transition-all shadow-sm">
+            Kembali & Coba Lagi
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-[11px] font-semibold tracking-wide text-gray-400 uppercase mt-6 mb-8">
+      Sistem Registrasi Pintar
+    </p>
+  </div>
+
+  <script>
+    const CACHE_KEY = 'guest_ticket_id_cache';
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const searchForm = document.getElementById('searchFormArea');
+      if (searchForm) {
+        searchForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          performSearch(document.getElementById('searchInput').value);
+        });
+      }
+
+      const savedQuery = localStorage.getItem(CACHE_KEY);
+      if (savedQuery) {
+        document.getElementById('searchInput').value = savedQuery;
+        document.getElementById('welcomeBackMessage').classList.remove('hidden');
+        setTimeout(function() { performSearch(savedQuery, true); }, 800);
+      }
+      
+      // Inisialisasi Countdown Timer
+      if (typeof window.TARGET_DATE !== 'undefined' && window.TARGET_DATE) {
+        initCountdown(window.TARGET_DATE);
+      }
+    });
+
+    // FUNGSI COUNTDOWN TIMER
+    function initCountdown(targetDateStr) {
+      // Mengubah format "YYYY-MM-DD HH:MM" menjadi ramah ke semua Browser (Safari/Chrome)
+      const safeDateStr = targetDateStr.replace(/-/g, '/');
+      const targetDate = new Date(safeDateStr).getTime();
+      
+      if (isNaN(targetDate)) return; // Berhenti jika format di Sheet salah
+
+      const timerInterval = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+
+        // Jika waktu sudah lewat / hari H acara
+        if (distance < 0) {
+          clearInterval(timerInterval);
+          document.getElementById("cd-days").innerText = "00";
+          document.getElementById("cd-hours").innerText = "00";
+          document.getElementById("cd-minutes").innerText = "00";
+          document.getElementById("cd-seconds").innerText = "00";
+          document.getElementById("cd-seconds").classList.replace("text-yellow-600", "text-green-600");
+          document.getElementById("cd-seconds").nextElementSibling.innerText = "Mulai";
+          document.getElementById("cd-seconds").nextElementSibling.classList.replace("text-yellow-500", "text-green-500");
+          return;
+        }
+
+        // Kalkulasi waktu
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Menampilkan hasilnya (dengan angka 0 di depan jika di bawah 10)
+        document.getElementById("cd-days").innerText = days.toString().padStart(2, '0');
+        document.getElementById("cd-hours").innerText = hours.toString().padStart(2, '0');
+        document.getElementById("cd-minutes").innerText = minutes.toString().padStart(2, '0');
+        document.getElementById("cd-seconds").innerText = seconds.toString().padStart(2, '0');
+      }, 1000);
+    }
+
+    function togglePreview() {
+      const container = document.getElementById('pdfPreviewContainer');
+      const btn = document.getElementById('btnTogglePreview');
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        btn.innerText = "Tutup Preview";
+      } else {
+        container.classList.add('hidden');
+        btn.innerText = "Lihat Preview";
+      }
+    }
+
+    function performSearch(queryText, isAutoLoad = false) {
+      try {
+        const query = queryText ? queryText.trim() : "";
+        if (!query) return;
+
+        const btn = document.getElementById('btnSearch');
+        const btnText = document.getElementById('btnSearchText');
+        const btnIcon = document.getElementById('btnSearchIcon');
+        
+        const loading = document.getElementById('loadingArea');
+        const resultArea = document.getElementById('resultArea');
+        const successBlock = document.getElementById('successResult');
+        const errorBlock = document.getElementById('errorResult');
+        const formArea = document.getElementById('searchFormArea');
+
+        // Reset state ke Loading
+        btn.disabled = true;
+        btnText.innerText = "Mencari...";
+        btnIcon.classList.add('hidden');
+        
+        resultArea.classList.add('hidden');
+        successBlock.classList.add('hidden');
+        errorBlock.classList.add('hidden');
+        loading.classList.remove('hidden');
+
+        // Mode Simulasi (Bypass jika dibuka di preview canvas lokal)
+        if (typeof google === 'undefined' || typeof google.script === 'undefined') {
+          setTimeout(function() {
+            loading.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            
+            btn.disabled = false;
+            btnText.innerText = "Temukan Undangan Saya";
+            btnIcon.classList.remove('hidden');
+            
+            if (query.toLowerCase() === "demo" || query.toLowerCase() === "g-001") {
+              document.getElementById('guestNameDisplay').innerText = "Tamu Demo";
+              document.getElementById('guestIdDisplay').innerText = "G-001";
+              document.getElementById('downloadLink').href = "#";
+              document.getElementById('pdfPreviewContainer').classList.add('hidden');
+              document.getElementById('qrCodeContainer').classList.add('hidden'); 
+              formArea.classList.add('hidden'); 
+              successBlock.classList.remove('hidden');
+              localStorage.setItem(CACHE_KEY, "demo"); 
+            } else {
+              document.getElementById('errorText').innerText = "Mode Pratinjau Lokal. Harap akses menggunakan Link URL Web App (Deploy) Google untuk terhubung ke database asli.";
+              errorBlock.classList.remove('hidden');
+              if (isAutoLoad) localStorage.removeItem(CACHE_KEY); 
+            }
+          }, 1000);
+          return; 
+        }
+
+        // Panggil Server Asli (Google Apps Script)
+        google.script.run
+          .withSuccessHandler(function(response) {
+            loading.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            
+            btn.disabled = false;
+            btnText.innerText = "Temukan Undangan Saya";
+            btnIcon.classList.remove('hidden');
+
+            if (response && response.success) {
+              localStorage.setItem(CACHE_KEY, query);
+              
+              document.getElementById('guestNameDisplay').innerText = response.name || "Tamu Terdaftar";
+              document.getElementById('guestIdDisplay').innerText = response.id || "ID";
+              document.getElementById('downloadLink').href = response.ticketUrl || "#";
+              
+              const qrImg = document.getElementById('qrImageDisplay');
+              const qrContainer = document.getElementById('qrCodeContainer');
+              
+              if (response.qrUrl && response.qrUrl.includes("http")) {
+                let qrIdMatch = response.qrUrl.match(/id=([-\w]+)/) || response.qrUrl.match(/d\/([-\w]+)/);
+                if (qrIdMatch && qrIdMatch[1]) {
+                  qrImg.src = "https://drive.google.com/thumbnail?id=" + qrIdMatch[1] + "&sz=w500";
+                } else {
+                  qrImg.src = response.qrUrl;
+                }
+                qrContainer.classList.remove('hidden');
+              } else {
+                qrContainer.classList.add('hidden');
+              }
+
+              const ticketUrl = response.ticketUrl || "";
+              let fileId = null;
+              const matchId = ticketUrl.match(/id=([-\w]+)/);
+              const matchD = ticketUrl.match(/\/d\/([-\w]+)/);
+              
+              if (matchId) fileId = matchId[1];
+              else if (matchD) fileId = matchD[1];
+
+              const previewFrame = document.getElementById('pdfPreviewFrame');
+              const btnToggle = document.getElementById('btnTogglePreview');
+              
+              document.getElementById('pdfPreviewContainer').classList.add('hidden');
+              btnToggle.innerText = "Lihat Preview";
+
+              if (fileId) {
+                previewFrame.src = "https://drive.google.com/file/d/" + fileId + "/preview";
+                btnToggle.style.display = "inline-block";
+              } else {
+                btnToggle.style.display = "none";
+              }
+
+              formArea.classList.add('hidden'); 
+              successBlock.classList.remove('hidden');
+              document.getElementById('welcomeBackMessage').classList.add('hidden');
+            } else {
+              document.getElementById('errorText').innerText = (response && response.message) ? response.message : "Data undangan tidak ditemukan.";
+              errorBlock.classList.remove('hidden');
+              if (isAutoLoad) localStorage.removeItem(CACHE_KEY); 
+            }
+          })
+          .withFailureHandler(function(error) {
+            loading.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            
+            btn.disabled = false;
+            btnText.innerText = "Temukan Undangan Saya";
+            btnIcon.classList.remove('hidden');
+            
+            document.getElementById('errorText').innerText = "Koneksi ke sistem gagal. Pastikan internet Anda stabil.";
+            errorBlock.classList.remove('hidden');
+          })
+          .searchGuestTicket(query);
+          
+      } catch (e) {
+        alert("Sistem UI bermasalah: " + e.message);
+      }
+    }
+
+    function resetSearch() {
+      document.getElementById('searchInput').value = "";
+      document.getElementById('resultArea').classList.add('hidden');
+      document.getElementById('searchFormArea').classList.remove('hidden');
+      document.getElementById('pdfPreviewFrame').src = ""; 
+      document.getElementById('welcomeBackMessage').classList.add('hidden');
+    }
+
+    function clearCacheAndReset() {
+      localStorage.removeItem(CACHE_KEY);
+      resetSearch();
+    }
+  </script>
+</body>
+</html>
