@@ -97,6 +97,11 @@
         </div>
       </div>
 
+      <!-- AREA EMBED VIDEO -->
+      <div id="videoContainer" class="hidden mb-7 relative z-10 w-full rounded-2xl overflow-hidden shadow-lg border border-gray-100/50 bg-gray-900 aspect-video fade-in">
+        <iframe id="videoFrame" src="" class="w-full h-full border-0 absolute inset-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+
       <!-- Form Pencarian -->
       <form id="searchFormArea" class="space-y-5 relative z-10">
         <div id="welcomeBackMessage" class="hidden text-center p-3 bg-blue-50 text-blue-700 rounded-xl text-xs font-semibold border border-blue-100 mb-4">
@@ -185,7 +190,7 @@
     // =========================================================
     // KONFIGURASI API (WAJIB DIISI SEBELUM DEPLOY KE GITHUB)
     // =========================================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyRD2HhOpPye4yJa9DApsfbJQZZIHDfwjE3A-DOKNnrbFDaKXcK1QecBoB8qy_AIFZKfA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycby9GxhsrAY2MfQfFLy-MZQuhJCJe9QWHnKvt7SNKda1sQVw_W36T02yVfja97rpnvzp/exec";
     // Contoh: const API_URL = "https://script.google.com/macros/s/AKfyc.../exec";
 
     const CACHE_KEY = 'guest_ticket_id_cache';
@@ -222,6 +227,25 @@
           if (initData.eventDateTime) {
             document.getElementById('countdownArea').classList.remove('hidden');
             initCountdown(initData.eventDateTime);
+          }
+          
+          if (initData.videoUrl) {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoFrame = document.getElementById('videoFrame');
+            
+            // Smart URL Parser: Otomatis mengubah link YouTube biasa menjadi format Embed
+            let finalVideoUrl = initData.videoUrl;
+            if (finalVideoUrl.includes('youtube.com/watch?v=')) {
+              finalVideoUrl = finalVideoUrl.replace('watch?v=', 'embed/');
+              // Bersihkan parameter tambahan seperti &list= atau &t=
+              finalVideoUrl = finalVideoUrl.split('&')[0]; 
+            } else if (finalVideoUrl.includes('youtu.be/')) {
+              finalVideoUrl = finalVideoUrl.replace('youtu.be/', 'youtube.com/embed/');
+              finalVideoUrl = finalVideoUrl.split('?')[0]; 
+            }
+            
+            videoFrame.src = finalVideoUrl;
+            videoContainer.classList.remove('hidden');
           }
 
           // Aktifkan Tombol
